@@ -293,17 +293,21 @@ confusionMatrix(predict(train_knn,test),factor(validation_set2aux$Y))$overall["A
 ######## NEURONAL NETWORKS ########
 set.seed(1997)
 
+#Creating formula
 n = names( main_set2aux )
 f = as.formula( paste( "Y ~", paste( n[!n %in% "Y"], collapse = "+" ) ) )
 
+#Training the data
 nn = neuralnet(f,main_set2aux,hidden = 4, linear.output = FALSE, threshold = 0.1 )
 
+#Predicting results
 nn.results = neuralnet::compute( nn, validation_set2aux )
 results = data.frame( actual = validation_set2aux$Y, prediction = round( nn.results$net.result ) )
 t = table(results)
 print(confusionMatrix(t))
 
 set.seed(1997)
+#PCA Conversion
 pca_trainset = main_set2aux %>% select( -Y )
 dat<-as.matrix(validation_set2aux %>% select(-Y))
 pca = prcomp( pca_trainset)
@@ -311,10 +315,14 @@ train = data.frame( Y = main_set2aux$Y, pca$x[,1:4] )
 test = sweep(dat,2,colMeans(dat)) %*% pca$rotation
 test <- test[,1:4]
 
+#Creating the formula
 n = names( train )
 f = as.formula( paste( "Y ~", paste( n[!n %in% "Y" ], collapse = "+" ) ) )
+
+#Training the data
 nn = neuralnet( f, train, hidden =4, linear.output = F, threshold = 0.1)
 
+#Predicting the results
 nn.results = neuralnet::compute( nn, test )
 
 # Results
